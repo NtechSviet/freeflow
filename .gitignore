@@ -16,3 +16,7 @@ native/ax-read
 .env
 .env.*
 *.local.json
+
+# portable mode: profile and voice model kept next to the app (see README)
+/data/
+portable.txt

@@ -1,5 +1,10 @@
 # Nouveautés
 
+## À venir
+
+### Version portable (Windows)
+- FreeFlow peut tourner depuis n'importe quel dossier, sans installation : un fichier vide **`portable.txt`** à côté de `FreeFlow.exe` suffit pour que le profil (`data\`) et le modèle vocal (`data\models\`) restent avec l'application au lieu d'aller dans `%APPDATA%` / `%LOCALAPPDATA%`. Le dossier devient déplaçable (clé USB, disque externe) et rien n'est laissé sur l'ordinateur. Voir la section « Version portable » du README.
+
 ## 1.2.0
 
 **Le collage automatique marche enfin, une barre toujours là, les réunions et les notes.**

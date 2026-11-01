@@ -19,6 +19,7 @@ const { parseVocabFile, vocabToCsv, vocabToXlsx, templateXlsx, exampleXlsx, exam
 const I18N = require('./lib/i18n');
 const { guessVariants, suggestionsFor, splitSpoken } = require('./lib/guess');
 const { wisprDbPath, readWisprDictionary } = require('./lib/wispr');
+const { portableRoot, portableDataDir } = require('./lib/portable');
 const { execFile } = require('child_process');
 
 app.setName('FreeFlow');
@@ -67,6 +68,14 @@ const DEV_MODE = !!(argv['lang-shots'] || argv['test-pipeline'] || argv.screensh
 // --user-data-dir=<dir>: separate profile (tests, portable use); Windows ignores %APPDATA% for Electron.
 if (typeof argv['user-data-dir'] === 'string' && argv['user-data-dir']) app.setPath('userData', path.resolve(argv['user-data-dir']));
 
+// ---- Portable mode ---------------------------------------------------------
+// A marker file next to the executable (portable.txt, a `data` folder) keeps the
+// profile, the logs and the voice model inside the folder: FreeFlow then runs from
+// a USB stick or any folder without installing anything. --user-data-dir wins when
+// both are given.
+const portable = app.isPackaged && !argv['user-data-dir'] ? portableRoot(process.execPath) : null;
+if (portable) app.setPath('userData', portableDataDir(portable));
+
 // ---- Single instance -------------------------------------------------------
 if (!app.requestSingleInstanceLock() && !DEV_MODE) {
   app.quit();
@@ -108,11 +117,13 @@ function initStores() {
   logDir = path.join(userData, 'logs');
   fs.mkdirSync(logDir, { recursive: true });
   logFile = path.join(logDir, 'freeflow.log');
+  if (portable) log('portable mode, profile kept next to the app:', userData);
   settings = createStore(path.join(userData, 'settings.json'), DEFAULT_SETTINGS);
   if (!fs.existsSync(settings.path)) settings.set(settings.get()); // write defaults so the file is discoverable
   if (!I18N.LANGS.includes(settings.get().uiLanguage)) settings.update({ uiLanguage: I18N.fromLocale(app.getLocale()) });
   // Models (0,5 to 3 GB) go to %LOCALAPPDATA%\FreeFlow\models, never to the roaming profile.
-  if (!settings.get().modelCache) settings.update({ modelCache: path.join(process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'FreeFlow') : userData, 'models') });
+  // Portable: next to the app, so copying the folder copies the voice model too.
+  if (!settings.get().modelCache) settings.update({ modelCache: portable ? path.join(userData, 'models') : path.join(process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'FreeFlow') : userData, 'models') });
   dictionary = createStore(path.join(userData, 'dictionary.json'), []);
   // Vocabulary entries are { word, sounds[] }; migrate legacy string lists and seed the defaults once.
   let vocab = normalizeVocab(dictionary.get());

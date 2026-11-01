@@ -179,6 +179,32 @@ test('meeting tracks merged by time, echo of the others removed from the mic', (
   assert.deepStrictEqual(mergeSegments([{ track: 'computer', start: 0, end: 3, text: 'Sous-titres réalisés par la communauté d’Amara.org' }]), []);
 });
 
+// ---- portable mode ------------------------------------------------------------
+const nodeOs = require('os');
+const nodePath = require('path');
+const { MARKERS, appDir, portableRoot, portableDataDir } = require('../lib/portable');
+test('portable mode: a marker next to the executable turns it on', () => {
+  const root = nodePath.join(nodeOs.tmpdir(), 'FreeFlow-Portable');
+  const exe = nodePath.join(root, 'FreeFlow.exe');
+  for (const marker of MARKERS) {
+    const exists = (p) => p === nodePath.join(root, marker);
+    assert.strictEqual(portableRoot(exe, { exists }), root, marker);
+  }
+  assert.strictEqual(portableRoot(exe, { exists: () => false }), null);
+});
+test('portable mode: the profile folder is <root>/data and gets created', () => {
+  const created = [];
+  const data = portableDataDir(nodePath.join('D:', 'FreeFlow'), { mkdir: (d) => created.push(d) });
+  assert.strictEqual(data, nodePath.join('D:', 'FreeFlow', 'data'));
+  assert.deepStrictEqual(created, [data]);
+});
+test('portable mode: a Mac marker sits next to the .app, not inside it', () => {
+  const exe = '/Applications/FreeFlow.app/Contents/MacOS/FreeFlow';
+  assert.strictEqual(appDir(exe), '/Applications');
+  assert.strictEqual(portableRoot(exe, { exists: (p) => p === nodePath.join('/Applications', 'portable.txt') }), '/Applications');
+  assert.strictEqual(portableRoot(exe, { exists: () => false }), null);
+});
+
 console.log(`${passed} tests OK${process.exitCode ? ', some FAILED' : ''}`);
 
 // Minimal .xlsx writer for the test (deflated sharedStrings, stored sheet with an inline string).

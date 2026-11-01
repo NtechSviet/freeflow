@@ -56,6 +56,36 @@ Gratuit, open source, sans compte, sans abonnement, et rien ne quitte ton ordina
 
 FreeFlow reste dans la zone de notification (près de l'horloge) : clic droit sur l'icône pour ouvrir la fenêtre, lancer une dictée ou quitter.
 
+## Version portable (Windows)
+
+FreeFlow peut vivre entièrement dans un dossier, sans installation : le programme,
+ton profil (réglages, dictionnaire, historique, notes, réunions) et le modèle de
+reconnaissance vocale restent ensemble, et rien n'est écrit dans `%APPDATA%`.
+Pratique pour une clé USB, un disque externe, ou pour essayer FreeFlow sans laisser
+de traces sur l'ordinateur.
+
+1. Installe FreeFlow une fois (voir ci-dessus), puis **copie** le dossier
+   d'installation (`%LOCALAPPDATA%\Programs\FreeFlow`) où tu veux.
+2. Crée un fichier vide nommé **`portable.txt`** à côté de `FreeFlow.exe`.
+3. Lance `FreeFlow.exe` : le profil est créé dans `data\`, à côté du programme, et le
+   modèle se télécharge une seule fois dans `data\models`.
+
+Le dossier est ensuite déplaçable : profil, dictionnaire, historique et modèle
+suivent. Pour revenir à une installation classique, supprime `portable.txt` (tu peux
+aussi supprimer `data\`). `data\logs\freeflow.log` reste le journal à consulter en cas
+de souci.
+
+Deux précisions utiles :
+
+- la présence d'un dossier `data\` suffit à activer le mode portable (ainsi le dossier
+  reste portable même si `portable.txt` est perdu) ;
+- `--user-data-dir=<dossier>` reste disponible et l'emporte sur `portable.txt` quand
+  les deux sont présents.
+
+Sous Windows, lance FreeFlow normalement (pas « en tant qu'administrateur ») :
+Windows bloque l'envoi de frappes d'un programme élevé vers une fenêtre qui ne l'est
+pas, et le collage automatique ne fonctionnerait plus.
+
 ## Installer sur Mac
 
 Pour les Mac à puce Apple (M1, M2, M3, M4…) avec macOS 12 ou plus récent.
